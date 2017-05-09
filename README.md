@@ -1,10 +1,32 @@
-## Rung - Book homes with Airbnb
+### Reserve acomodações com o Airbnb
 
-This integration provides to you the possibility to get alerted about available
-rentals in the Airbnb that you would like to know. In the _"Book homes with Airbnb"_
-you can configurate _how much_ do you want to spend, how many rooms, beds and
-bathrooms you would like to have in the house.
+Rung &lt;suporte@rung.com.br&gt;
 
-Feel confortable to choose a place to stay.
+[![Deploy to Rung](https://i.imgur.com/uijt57R.png)](https://app.rung.com.br/integration/airbnb/customize)
 
-![](http://i.imgur.com/wF4uFaL.png)
+![rung-cli 0.2.8](https://img.shields.io/badge/rung--cli-0.2.8-blue.svg?style=flat-square)
+![airbnb 1.0.0](https://img.shields.io/badge/airbnb-1.0.0-green.svg?style=flat-square)
+
+Reserve acomodações únicas e vivencie a cidade como um morador local.
+
+#### Parameters
+
+|Parameter | Type | Description |
+|----------|------|-------------|
+| `location` | `String` | Local |
+| `guests` | `Natural` | Pessoas |
+| `maxPrice` | `Natural` | Valor máximo |
+| `bedrooms` | `Natural` | Quartos |
+| `beds` | `Natural` | Camas |
+| `bathrooms` | `Natural` | Banheiros |
+| `currency` | `OneOf([AED, ARS, AUD, BGN, BRL, CAD, CHF, CLP, COP, CRC, CZK, DKK, EUR, GBP, HKD, HRK, HUF, IDR, ILS, INR, JPY, KRW, MAD, MXN, MYR, NOK, NZD, PEN, PHP, PLN, RON, RUB, SAR, SEK, SGD, THB, TRY, TWD, UAH, USD, UYU, VND, ZAR])` | Moeda |
+
+<img align="left" width="256" src="./icon.png" />
+
+##### Dependencies
+
+- `bluebird`: `^3.4.7`
+- `ramda`: `^0.23.0`
+- `rung-sdk`: `^1.0.7`
+- `superagent`: `^3.5.0`
+- `superagent-promise`: `^1.1.0`
