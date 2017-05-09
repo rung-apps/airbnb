@@ -21,6 +21,10 @@ Reserve acomodações únicas e vivencie a cidade como um morador local.
 | `bathrooms` | `Natural` | Banheiros |
 | `currency` | `OneOf([AED, ARS, AUD, BGN, BRL, CAD, CHF, CLP, COP, CRC, CZK, DKK, EUR, GBP, HKD, HRK, HUF, IDR, ILS, INR, JPY, KRW, MAD, MXN, MYR, NOK, NZD, PEN, PHP, PLN, RON, RUB, SAR, SEK, SGD, THB, TRY, TWD, UAH, USD, UYU, VND, ZAR])` | Moeda |
 
+
+![](http://i.imgur.com/wF4uFaL.png)
+
+
 <img align="left" width="256" src="./icon.png" />
 
 ##### Dependencies
@@ -30,5 +34,3 @@ Reserve acomodações únicas e vivencie a cidade como um morador local.
 - `rung-sdk`: `^1.0.7`
 - `superagent`: `^3.5.0`
 - `superagent-promise`: `^1.1.0`
-
-![](http://i.imgur.com/wF4uFaL.png)
