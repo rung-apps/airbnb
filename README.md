@@ -30,3 +30,5 @@ Reserve acomodações únicas e vivencie a cidade como um morador local.
 - `rung-sdk`: `^1.0.7`
 - `superagent`: `^3.5.0`
 - `superagent-promise`: `^1.1.0`
+
+![](http://i.imgur.com/wF4uFaL.png)
