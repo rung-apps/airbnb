@@ -1,7 +1,6 @@
 {
   "name": "airbnb",
-  "version": "1.0.4",
-  "description": "Book unique accommodations and experience the city as a local resident.",
+  "version": "1.0.13",
   "main": "index.js",
   "author": "Rung <suporte@rung.com.br>",
   "license": "MIT",
@@ -13,11 +12,7 @@
     "superagent": "^3.5.0",
     "superagent-promise": "^1.1.0"
   },
-  "rung": {
-    "title": "Reserve acomodações com o Airbnb",
-    "preview": "<div><div style=\"float:left;width:50px;margin-left:-10px;background-color:#ccc\"><div style=\"background-image:url(https://a0.muscache.com/im/pictures/9335e630-a591-4aee-8229-5bb0f96c8d8e.jpg?aki_policy=large);margin-bottom:5px;width:50px;height:30px;background-size:cover;background-position:bottom\"> </div><div style=\"background-image:url(https://a0.muscache.com/im/pictures/01fc44eb-da48-4313-99c8-70dfdd8111ee.jpg?aki_policy=large);margin-bottom:5px;width:50px;height:30px;background-size:cover;background-position:bottom\"> </div><div style=\"background-image:url(https://a0.muscache.com/im/pictures/0e51689b-8527-48f4-b263-e8c1c11bbca7.jpg?aki_policy=large);margin-bottom:0px;width:50px;height:30px;background-size:cover;background-position:bottom\"> </div></div><div style=\"float:right;width:102px;margin-right:-5px\"><div><img src=\"http://i.imgur.com/vVpo0ly.png\" alt=\"Apartamento\" /></div><div>Quarto em apê - Ótimo para Festival de Dança</div><div><b>BRL 44,00</b></div></div></div>"
-  },
   "devDependencies": {
-    "rung-cli": "^0.4.3"
+    "rung-cli": "^0.9.4"
   }
 }
