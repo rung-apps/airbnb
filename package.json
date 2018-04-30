@@ -1,18 +1,19 @@
 {
   "name": "airbnb",
-  "version": "1.0.13",
+  "version": "1.2.4",
   "main": "index.js",
   "author": "Rung <suporte@rung.com.br>",
   "license": "MIT",
   "category": "travel",
   "dependencies": {
     "bluebird": "^3.4.7",
-    "ramda": "^0.23.0",
+    "moment": "^2.20.1",
+    "ramda": "0.25.0",
     "rung-sdk": "^1.0.7",
     "superagent": "^3.5.0",
     "superagent-promise": "^1.1.0"
   },
   "devDependencies": {
-    "rung-cli": "^0.9.4"
+    "rung-cli": "^1.2.1"
   }
 }
