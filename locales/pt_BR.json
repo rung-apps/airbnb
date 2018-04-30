@@ -9,8 +9,14 @@
     "Accommodates up to": "Acomoda até",
     "See the accommodation": "Veja a acomodação",
     "Book accommodation with Airbnb": "Reserve acomodações com o Airbnb",
-    "Book unique accommodations and experience the city as a local resident.": "Reserve acomodações únicas e vivencie a cidade como um morador local.",
+    "Book accommodation with AirBnb and get to know the world in a different way!": "Reserve acomodações pelo AirBnb e conheça o mundo de outra forma!",
     "Apartment": "Apartamento",
     "Room in apartment - Great for Dance Festival": "Quarto em apê - Ótimo para Festival de Dança",
-    "USD": "BRL"
+    "USD": "BRL",
+    "Checkin date": "Data de checkin",
+    "Checkout date": "Data de checkout",
+    "Only entire home/apt?": "Apenas casa/apt inteiro?",
+    "Space type": "Tipo de espaço",
+    "Building": "Prédio",
+    "House": "Casa"
 }

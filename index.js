@@ -1,71 +1,147 @@
 import { create } from 'rung-sdk';
-import { String as Text, Natural, OneOf } from 'rung-sdk/dist/types';
+import {
+    Natural,
+    OneOf,
+    IntegerMultiRange,
+    DateTime,
+    AutoComplete
+} from 'rung-cli/dist/types';
 import Bluebird from 'bluebird';
 import agent from 'superagent';
+import moment from 'moment';
 import promisifyAgent from 'superagent-promise';
 import {
-    map,
-    join,
-    repeat,
-    isNil,
-    mergeAll,
+    __,
+    always,
+    concat,
     cond,
     contains,
-    always,
-    T,
-    __,
+    evolve,
+    filter,
+    identity,
+    ifElse,
+    isNil,
+    join,
+    keys,
+    length,
+    lt,
+    map,
     merge,
-    take
+    mergeAll,
+    pipe,
+    repeat,
+    replace,
+    T,
+    take,
+    unless,
+    when
 } from 'ramda';
 
 const request = promisifyAgent(agent, Bluebird);
-const clientId = '3092nxybyb0otqw18e8nh5nty';
-const url = `https://api.airbnb.com/v2/search_results?client_id=${clientId}`;
+const clientId = 'd306zoyjsyarp7ifhu67rjxn52tv0t20';
+const url = `https://www.airbnb.com.br/api/v2/explore_tabs`;
+const preview = [
+    _('Room in apartment - Great for Dance Festival'),
+    1,
+    `${_('USD')} 44,00`,
+    'https://a0.muscache.com/im/pictures/9335e630-a591-4aee-8229-5bb0f96c8d8e.jpg?aki_policy=large'
+];
+
+const currencies = {
+    AUD: 'AU$',
+    BGN: 'BGN',
+    BRL: 'R$',
+    CAD: 'CA$',
+    CHF: 'CHF',
+    CNY: 'CN¥',
+    CZK: 'Kč',
+    DKK: 'Dkr',
+    EUR: '€',
+    GBP: '£',
+    HKD: 'HK$',
+    HRK: 'kn',
+    HUF: 'Ft',
+    IDR: 'Rp',
+    ILS: '₪',
+    INR: 'Rs',
+    JPY: '¥',
+    KRW: '₩',
+    MXN: 'MX$',
+    MYR: 'RM',
+    NOK: 'Nkr',
+    NZD: 'NZ$',
+    PHP: '₱',
+    PLN: 'zł',
+    RON: 'RON',
+    RUB: 'RUB',
+    SEK: 'Skr',
+    SGD: 'S$',
+    THB: '฿',
+    TRY: 'TL',
+    USD: '$',
+    ZAR: 'R'
+};
 
 const styles = {
-    thumbnailArea: {
-        float: 'left',
-        width: '50px',
-        marginLeft: '-10px',
-        backgroundColor: '#ccc',
-        position: 'absolute'
-    },
     textArea: {
-        float: 'right',
-        width: '102px',
-        marginRight: '-5px'
+        textAlign: 'center',
+        color: '#FFFFFF',
+        position: 'absolute',
+        width: '145px'
     },
     thumbnail: {
-        width: '50px',
-        height: '30px',
-        backgroundSize: 'cover',
-        backgroundPosition: 'bottom'
+        position: 'absolute',
+        width: '165px',
+        height: '125px',
+        top: '0px',
+        left: '0px'
+    },
+    name: {
+        padding: '12px 0',
+        height: '36px'
+    },
+    price: {
+        fontSize: '16px',
+        fontWeight: 'bold'
     }
 };
+
+const ellipsize = ifElse(
+    pipe(length, lt(39)),
+    pipe(take(36), concat(__, '...')),
+    identity
+);
+
+const optimize = replace('=large', '=small');
 
 function createAlert({ listing, pricing_quote }) {
     const {
         id,
         name,
-        property_type,
         property_type_id,
         star_rating,
         person_capacity,
-        public_address,
         bedrooms,
         beds,
         bathrooms,
-        picture_urls
+        picture_urls,
+        localized_city,
+        localized_neighborhood,
+        space_type
     } = listing;
-    const { localized_currency, localized_nightly_price } = pricing_quote;
-    const price = `${localized_currency} ${localized_nightly_price},00`;
+    const price = `${pricing_quote.rate.amount_formatted},00`;
+    const address = pipe(
+        filter(identity),
+        join(', ')
+    )([localized_city, localized_neighborhood]);
+
     const url = `https://www.airbnb.com.br/rooms/${id}`;
     const stars = isNil(star_rating) ? '' : join('', repeat('★', parseInt(star_rating, 10)));
 
     return {
         [id]: {
-            title: public_address,
-            content: renderContent(name, property_type, property_type_id, price, picture_urls),
+            title: address,
+            content: render(name, property_type_id, price, picture_urls[0]),
             comment: `
                 ### ${name} ${stars}
 
@@ -75,92 +151,120 @@ function createAlert({ listing, pricing_quote }) {
                 ${_('Beds')}: ${beds}
                 ${_('Bathrooms')}: ${bathrooms}
                 ${_('Accommodates up to')}: ${person_capacity}
-                ${public_address}
+                ${_('Space type')}: ${space_type}
+                ${address}
                 \n\n
                 [${_('See the accommodation')}](${url})
-
-                ${join('\n\n', map(picture => `![${property_type}](${picture})`, picture_urls))}
-
-            `
+            `,
+            resources: picture_urls
         }
     };
 }
 
-function renderContent(name, type, type_id, price, pictures) {
-    const building = 'http://i.imgur.com/gJU240K.png';
-    const house = 'http://i.imgur.com/bEcOMhY.png';
-    // A list with some property types is found in the end of this file
+function render(name, type_id, price, picture) {
+    const building = 'https://i.imgur.com/gJU240K.png';
+    const house = 'https://i.imgur.com/bEcOMhY.png';
+
+    // A list with some property types that is found in the commented_api.txt file
     const icon = cond([
-        [contains(__, [1, 3, 5, 9, 37, 40, 43]), always(building)],
-        [contains(__, [2, 4, 6, 11, 16, 22, 24, 36]), always(house)],
-        [T, always(house)]
+        [contains(__, [1, 3, 5, 9, 37, 40, 43]), always(
+            { icon: building, description: _('Building') }
+        )],
+        [contains(__, [2, 4, 6, 11, 16, 22, 24, 36]), always(
+            { icon: house, description: _('House') }
+        )],
+        [T, always({ icon: house, description: _('House') })]
     ])(type_id);
+
     return (
         <div>
-            <div style={ styles.thumbnailArea }>
-                { join('', take(3, pictures).map(getThumbnail)) }
-            </div>
+            <img
+                src={ optimize(picture) }
+                style={ styles.thumbnail }
+            />
+            <div
+                style={ merge(styles.thumbnail,
+                    { backgroundColor: 'rgba(0, 0, 0, 0.6)' }
+                ) }
+            />
             <div style={ styles.textArea }>
-                <div>
-                    <img src={ icon } alt={ type } />
+                <img src={ icon.icon } alt={ icon.description } />
+                <div
+                    title={ name }
+                    style={ styles.name }>
+                    { ellipsize(name) }
                 </div>
-                <div>{ name }</div>
-                <div><b>{ price }</b></div>
+                <div style={ styles.price }>
+                    { price }
+                </div>
             </div>
         </div>
     );
-}
-
-function getThumbnail(src, index) {
-    return (
-        <div
-            key={ `imagem${index}` }
-            style={ merge(
-                {
-                    backgroundImage: `url(${src})`,
-                    marginBottom: index === 2 ? '0px' : '5px'
-                },
-                styles.thumbnail)}>ㅤ
-        </div>
-    );
-    // TODO: retirar caractere invisível da linha 123, ele foi adicionado por bug no rung-cli
 }
 
 function main(context, done) {
-    const { location, guests, maxPrice, bedrooms, beds, bathrooms, currency } = context.params;
+    const {
+        location,
+        guests,
+        priceRange,
+        checkin,
+        checkout,
+        bedrooms,
+        beds,
+        bathrooms,
+        currency,
+        wholeHouse
+    } = context.params;
+    const locale = context.locale === 'pt_BR' ? 'pt' : context.locale;
+    const formatDate = date => moment(date, 'MM/DD/YYYY').format('YYYY-MM-DD');
+
+    const extra = pipe(
+        evolve({
+            checkin: unless(isNil, formatDate),
+            checkout: unless(isNil, formatDate),
+            'room_types[]': when(always(wholeHouse === 'Sim'), always(
+                'Entire home/apt'))
+        }),
+        filter(identity)
+    )({ checkin, checkout, 'room_types[]': undefined });
 
     return request.get(url)
-        .query({
-            locale: 'pt-BR',
-            _limit: 20,
+        .query(merge({
+            version: '1.3.2',
+            experiences_per_grid: '20',
+            items_per_grid: '18',
+            guidebooks_per_grid: '20',
+            auto_ib: 'true',
+            fetch_filters: 'true',
+            is_new_homes_cards_experiment: 'true',
+            show_groupings: 'false',
+            timezone_offset: '-120',
+            metadata_only: 'false',
+            is_standard_search: 'true',
+            selected_tab_id: 'home_tab',
             location,
-            guests,
-            price_max: maxPrice,
+            adults: guests,
+            price_min: priceRange[0],
+            price_max: priceRange[1],
             min_bedrooms: bedrooms,
             min_beds: beds,
             min_bathrooms: bathrooms,
-            currency
-        })
+            key: clientId,
+            currency,
+            locale
+        }, extra))
         .then(({ body }) => {
-            const search = body.search_results || [];
-            const alerts = mergeAll(map(createAlert, search));
+            const places = body.explore_tabs[0].sections[0].listings || [];
+            const alerts = mergeAll(map(createAlert, places));
             done({ alerts });
         })
         .catch(() => done({ alerts: {} }));
 }
 
-const currencies = [
-    'AED', 'ARS', 'AUD', 'BGN', 'BRL', 'CAD', 'CHF', 'CLP', 'COP',
-    'CRC', 'CZK', 'DKK', 'EUR', 'GBP', 'HKD', 'HRK', 'HUF', 'IDR',
-    'ILS', 'INR', 'JPY', 'KRW', 'MAD', 'MXN', 'MYR', 'NOK', 'NZD',
-    'PEN', 'PHP', 'PLN', 'RON', 'RUB', 'SAR', 'SEK', 'SGD', 'THB',
-    'TRY', 'TWD', 'UAH', 'USD', 'UYU', 'VND', 'ZAR'
-];
-
 const params = {
     location: {
         description: _('Local'),
-        type: Text,
+        type: AutoComplete,
         required: true
     },
     guests: {
@@ -168,10 +272,18 @@ const params = {
         type: Natural,
         default: 1
     },
-    maxPrice: {
-        description: _('Maximum price'),
-        type: Natural,
-        default: 100
+    priceRange: {
+        description: _('Select how much you want to pay per day'),
+        type: IntegerMultiRange(0, 5000),
+        default: [0, 100]
+    },
+    checkin: {
+        description: _('Checkin date'),
+        type: DateTime
+    },
+    checkout: {
+        description: _('Checkout date'),
+        type: DateTime
     },
     bedrooms: {
         description: _('Bedrooms'),
@@ -188,35 +300,23 @@ const params = {
         type: Natural,
         default: 1
     },
+    // TODO: when we have selectbox in frontend, swap type of wholeHouse
+    wholeHouse: {
+        description: _('Only entire home/apt?'),
+        type: OneOf(['Sim', 'Não']),
+        default: 'Sim'
+    },
     currency: {
         description: _('Currency'),
-        type: OneOf(currencies),
+        type: OneOf(keys(currencies)),
         required: true
     }
 };
 
-export default create(main, { params, primaryKey: true });
-
-/**
-* Property types
-* 1 - Apartamento
-* 2 - Casa
-* 3 - Pousada
-* 4 - Casa de campo
-* 5 - Castelo
-* 6 - Casa na árvore
-* 8 - Barco
-* 9 - Hostel
-* 11 - Vila
-* 16 - Tenda
-* 18 - Gruta
-* 22 - Chalé
-* 24 - Cabana
-* 25 - Trem
-* 28 - Avião
-* 33 - Outros
-* 36 - Geminad
-* 37 - Condomínio
-* 40 - Hospedaria
-* 43 - Hotel butique
-*/
+export default create(main, {
+    params,
+    primaryKey: true,
+    title: _('Book accommodation with Airbnb'),
+    description: _('Book accommodation with AirBnb and get to know the world in a different way!'),
+    preview: render(...preview)
+});
